@@ -1,18 +1,18 @@
 		; tell NASM we want 16-bit assembly language
 		BITS	16
 		ORG	0x100				; DOS loads us here
-Start:		CALL	InitVideo
-		MOV	CX, REFRESH_RATE * WAIT_SECS	; init counter
+Start:		CALL	InstallKB
+		CALL	InitVideo
 .gameLoop:	CALL	WaitFrame
-		DEC	CX				; dec counter
-		JNZ	.gameLoop			; loop if counter > 0
+		CMP	BYTE [Quit], 1
+		JNE	.gameLoop			; loop if counter > 0
 		CALL	RestoreVideo
+		CALL	RestoreKB
 		; exit
-		MOV	AH, 0x4C
-		MOV	AL, 0				; return code 0
+		MOV	AX, 0x4C00
 		INT	0x21
 
-REFRESH_RATE	EQU	70
-WAIT_SECS	EQU	5
+Quit:		DB	0
 
+%include "kb.asm"
 %include "video.asm"
